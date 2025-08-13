@@ -25,20 +25,10 @@
     </div>
 
     <script>
-        // ▼▼▼ ANDA HANYA PERLU MENGUBAH BAGIAN INI ▼▼▼
-        const SECRET_PHRASE = "MountDaunSecretKey2025"; // Ganti dengan frasa rahasia UNIK Anda
-        const VALIDITY_MINUTES = 10; // Kunci ini akan valid selama 10 menit
+        // ▼▼▼ PASTIKAN PENGATURAN INI SAMA DENGAN DI SKRIP ROBLOX ANDA ▼▼▼
+        const SECRET_PHRASE = "MountDaunSecretKey2025";
+        const VALIDITY_MINUTES = 10;
         // ▲▲▲ TIDAK ADA YANG PERLU DIUBAH DI BAWAH INI ▲▲▲
-
-        // PERBAIKAN: Fungsi hashing sederhana yang sama persis dengan yang ada di skrip Lua
-        function simpleHash(data) {
-            let hash = 0;
-            for (let i = 0; i < data.length; i++) {
-                hash = (hash * 31 + data.charCodeAt(i)) | 0; // Menggunakan bitwise OR 0 untuk menjaga integer 32-bit
-            }
-            // Mengonversi ke hex string 8 digit (sama seperti string.format("%08x", hash) di Lua)
-            return ('00000000' + (hash >>> 0).toString(16)).slice(-8);
-        }
 
         const keyElement = document.getElementById('key');
         const copyBtn = document.getElementById('copy-btn');
@@ -47,12 +37,14 @@
         function generateKey() {
             const now = Math.floor(Date.now() / 1000);
             const timeBucket = Math.floor(now / (VALIDITY_MINUTES * 60));
-            const dataToHash = SECRET_PHRASE + timeBucket;
-            
-            const hash = simpleHash(dataToHash);
-            
-            // Menggunakan 8 karakter dari hash sederhana kita
-            const finalKey = "TRIAL-" + hash.substring(0, 8).toUpperCase();
+            const dataToProcess = SECRET_PHRASE + timeBucket;
+
+            // Metode Baru: Balik urutan string, lalu encode ke Base64
+            const reversedData = dataToProcess.split('').reverse().join('');
+            const encodedData = btoa(reversedData); // btoa adalah fungsi bawaan browser untuk Base64
+
+            // Ambil 8 karakter pertama dan tambahkan prefix
+            const finalKey = "TRIAL-" + encodedData.substring(0, 8).toUpperCase();
             keyElement.textContent = finalKey;
         }
 
