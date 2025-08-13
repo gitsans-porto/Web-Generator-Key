@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key Generator</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1c1d21; color: #e0e0e0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
+        .container { background-color: #282a36; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 1px solid #44475a; }
+        h1 { color: #50fa7b; margin-top: 0; }
+        p { font-size: 1.1em; }
+        #key { background-color: #44475a; padding: 15px; border-radius: 8px; font-size: 1.5em; font-weight: bold; letter-spacing: 2px; margin: 20px 0; user-select: all; cursor: pointer; }
+        #copy-btn { background-color: #bd93f9; color: #fff; border: none; padding: 12px 25px; border-radius: 8px; font-size: 1em; cursor: pointer; transition: background-color 0.2s; }
+        #copy-btn:hover { background-color: #aa81e4; }
+        #status { margin-top: 15px; color: #ffb86c; font-style: italic; height: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Kunci Trial Anda</h1>
+        <p>Salin kunci di bawah ini dan masukkan ke dalam skrip.</p>
+        <div id="key" title="Klik untuk menyalin">GENERATING...</div>
+        <button id="copy-btn">Salin Kunci</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        // Inisialisasi CryptoJS (untuk hashing) dari CDN
+        var script = document.createElement('script');
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js";
+        script.onload = function () {
+            // ▼▼▼ ANDA HANYA PERLU MENGUBAH BAGIAN INI ▼▼▼
+            const SECRET_PHRASE = "MountDaunSecretKey2025"; // Ganti dengan frasa rahasia UNIK Anda
+            const VALIDITY_MINUTES = 10; // Kunci ini akan valid selama 10 menit
+            // ▲▲▲ TIDAK ADA YANG PERLU DIUBAH DI BAWAH INI ▲▲▲
+
+            const keyElement = document.getElementById('key');
+            const copyBtn = document.getElementById('copy-btn');
+            const statusElement = document.getElementById('status');
+
+            function generateKey() {
+                const now = Math.floor(Date.now() / 1000);
+                const timeBucket = Math.floor(now / (VALIDITY_MINUTES * 60));
+                const dataToHash = SECRET_PHRASE + timeBucket;
+                const hash = CryptoJS.SHA256(dataToHash).toString();
+                
+                // Ambil 12 karakter pertama dari hash untuk membuat kunci lebih pendek
+                const finalKey = "TRIAL-" + hash.substring(0, 12).toUpperCase();
+                keyElement.textContent = finalKey;
+            }
+
+            function copyKey() {
+                navigator.clipboard.writeText(keyElement.textContent).then(() => {
+                    statusElement.textContent = "Kunci berhasil disalin!";
+                    setTimeout(() => { statusElement.textContent = ""; }, 2000);
+                }).catch(err => {
+                    statusElement.textContent = "Gagal menyalin.";
+                });
+            }
+
+            keyElement.addEventListener('click', copyKey);
+            copyBtn.addEventListener('click', copyKey);
+
+            generateKey();
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
