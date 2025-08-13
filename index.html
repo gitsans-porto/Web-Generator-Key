@@ -25,45 +25,50 @@
     </div>
 
     <script>
-        // Inisialisasi CryptoJS (untuk hashing) dari CDN
-        var script = document.createElement('script');
-        script.src = "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js";
-        script.onload = function () {
-            // ▼▼▼ ANDA HANYA PERLU MENGUBAH BAGIAN INI ▼▼▼
-            const SECRET_PHRASE = "MountDaunSecretKey2025"; // Ganti dengan frasa rahasia UNIK Anda
-            const VALIDITY_MINUTES = 10; // Kunci ini akan valid selama 10 menit
-            // ▲▲▲ TIDAK ADA YANG PERLU DIUBAH DI BAWAH INI ▲▲▲
+        // ▼▼▼ ANDA HANYA PERLU MENGUBAH BAGIAN INI ▼▼▼
+        const SECRET_PHRASE = "MountDaunSecretKey2025"; // Ganti dengan frasa rahasia UNIK Anda
+        const VALIDITY_MINUTES = 10; // Kunci ini akan valid selama 10 menit
+        // ▲▲▲ TIDAK ADA YANG PERLU DIUBAH DI BAWAH INI ▲▲▲
 
-            const keyElement = document.getElementById('key');
-            const copyBtn = document.getElementById('copy-btn');
-            const statusElement = document.getElementById('status');
-
-            function generateKey() {
-                const now = Math.floor(Date.now() / 1000);
-                const timeBucket = Math.floor(now / (VALIDITY_MINUTES * 60));
-                const dataToHash = SECRET_PHRASE + timeBucket;
-                const hash = CryptoJS.SHA256(dataToHash).toString();
-                
-                // Ambil 12 karakter pertama dari hash untuk membuat kunci lebih pendek
-                const finalKey = "TRIAL-" + hash.substring(0, 12).toUpperCase();
-                keyElement.textContent = finalKey;
+        // PERBAIKAN: Fungsi hashing sederhana yang sama persis dengan yang ada di skrip Lua
+        function simpleHash(data) {
+            let hash = 0;
+            for (let i = 0; i < data.length; i++) {
+                hash = (hash * 31 + data.charCodeAt(i)) | 0; // Menggunakan bitwise OR 0 untuk menjaga integer 32-bit
             }
+            // Mengonversi ke hex string 8 digit (sama seperti string.format("%08x", hash) di Lua)
+            return ('00000000' + (hash >>> 0).toString(16)).slice(-8);
+        }
 
-            function copyKey() {
-                navigator.clipboard.writeText(keyElement.textContent).then(() => {
-                    statusElement.textContent = "Kunci berhasil disalin!";
-                    setTimeout(() => { statusElement.textContent = ""; }, 2000);
-                }).catch(err => {
-                    statusElement.textContent = "Gagal menyalin.";
-                });
-            }
+        const keyElement = document.getElementById('key');
+        const copyBtn = document.getElementById('copy-btn');
+        const statusElement = document.getElementById('status');
 
-            keyElement.addEventListener('click', copyKey);
-            copyBtn.addEventListener('click', copyKey);
+        function generateKey() {
+            const now = Math.floor(Date.now() / 1000);
+            const timeBucket = Math.floor(now / (VALIDITY_MINUTES * 60));
+            const dataToHash = SECRET_PHRASE + timeBucket;
+            
+            const hash = simpleHash(dataToHash);
+            
+            // Menggunakan 8 karakter dari hash sederhana kita
+            const finalKey = "TRIAL-" + hash.substring(0, 8).toUpperCase();
+            keyElement.textContent = finalKey;
+        }
 
-            generateKey();
-        };
-        document.head.appendChild(script);
+        function copyKey() {
+            navigator.clipboard.writeText(keyElement.textContent).then(() => {
+                statusElement.textContent = "Kunci berhasil disalin!";
+                setTimeout(() => { statusElement.textContent = ""; }, 2000);
+            }).catch(err => {
+                statusElement.textContent = "Gagal menyalin.";
+            });
+        }
+
+        keyElement.addEventListener('click', copyKey);
+        copyBtn.addEventListener('click', copyKey);
+
+        generateKey();
     </script>
 </body>
 </html>
